@@ -46,16 +46,31 @@ function syncData() {
   const item = queue[0];
 
 <form id="attendanceForm" action="https://script.google.com/macros/s/XXXX/exec" method="POST" target="hidden_iframe">
-  <input type="hidden" name="code" value="12345">
+  <input type="hidden" name="code" id="codeInput">
 </form>
 <iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <script>
 function submitAttendance(code) {
-  const form = document.getElementById("attendanceForm");
-  form.code.value = code; // تحديث الكود
-  form.submit();
-  alert("تم إرسال الحضور بنجاح!");
+  document.getElementById('codeInput').value = code;
+
+  // تخزين مؤقت Offline
+  let queue = JSON.parse(localStorage.getItem('attendanceQueue') || '[]');
+  queue.push({code: code, time: new Date().toISOString()});
+  localStorage.setItem('attendanceQueue', JSON.stringify(queue));
+
+  // إرسال البيانات فورًا
+  document.getElementById('attendanceForm').submit();
+
+  alert("تم تسجيل حضورك!");
+}
+
+// مثال: استدعاء عند فتح الصفحة بالـ QR code
+const urlParams = new URLSearchParams(window.location.search);
+const code = urlParams.get('code');
+if (code) submitAttendance(code);
+</script>
+
 }
 
 submitAttendance("12345");
