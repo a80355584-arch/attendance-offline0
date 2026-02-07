@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Attendance Offline</title>
+</head>
+<body>
+
+<h2>📋 تسجيل حضور</h2>
+<div id="status">جاري التسجيل...</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/XXXX/exec"; // رابطك
+const params = new URLSearchParams(window.location.search);
+const code = params.get("code");
+
+if (!code) {
+  document.getElementById("status").innerText = "❌ QR غير صالح";
+  throw "";
+}
+
+// تحميل البيانات المخزنة
+let queue = JSON.parse(localStorage.getItem("attendanceQueue") || "[]");
+
+// إضافة تسجيل جديد
+queue.push({
+  code: code,
+  time: new Date().toISOString()
+});
+
+// حفظ محلي
+localStorage.setItem("attendanceQueue", JSON.stringify(queue));
+
+document.getElementById("status").innerText =
+  "✅ تم التسجيل محليًا (أوفلاين)";
+
+// محاولة الإرسال
+syncData();
+
+function syncData() {
+  if (!navigator.onLine) return;
+
+  let queue = JSON.parse(localStorage.getItem("attendanceQueue") || "[]");
+  if (queue.length === 0) return;
+
+  const item = queue[0];
+
+  fetch(`${SCRIPT_URL}?code=${item.code}`)
+    .then(r => r.text())
+    .then(() => {
+      queue.shift(); // حذف بعد الإرسال
+      localStorage.setItem("attendanceQueue", JSON.stringify(queue));
+      syncData(); // إرسال الباقي
+    })
+    .catch(() => {
+      console.log("لسه مفيش نت");
+    });
+}
+
+// أول ما النت يرجع
+window.addEventListener("online", syncData);
+</script>
+
+</body>
+</html>
 
