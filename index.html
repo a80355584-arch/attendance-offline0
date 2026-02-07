@@ -9,78 +9,33 @@
 <h2>📋 تسجيل حضور</h2>
 <div id="status">جاري التسجيل...</div>
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxARLTg5bYpJjOPVMbW-Oopvvh5h0tI33J6swRkKs1i5216diTMn46Z13ve_PUSaSNG/exec"; // رابطك
-const params = new URLSearchParams(window.location.search);
-const code = params.get("code");
-
-if (!code) {
-  document.getElementById("status").innerText = "❌ QR غير صالح";
-  throw "";
-}
-
-// تحميل البيانات المخزنة
-let queue = JSON.parse(localStorage.getItem("attendanceQueue") || "[]");
-
-// إضافة تسجيل جديد
-queue.push({
-  code: code,
-  time: new Date().toISOString()
-});
-
-// حفظ محلي
-localStorage.setItem("attendanceQueue", JSON.stringify(queue));
-
-document.getElementById("status").innerText =
-  "✅ تم التسجيل محليًا (أوفلاين)";
-
-// محاولة الإرسال
-syncData();
-
-function syncData() {
-  if (!navigator.onLine) return;
-
-  let queue = JSON.parse(localStorage.getItem("attendanceQueue") || "[]");
-  if (queue.length === 0) return;
-
-  const item = queue[0];
-
-<form id="attendanceForm" action="https://script.google.com/macros/s/XXXX/exec" method="POST" target="hidden_iframe">
+<form id="attendanceForm" action="https://script.google.com/macros/s/AKfycbw1KEhuikIeOVTs8rTnMmVRJ3tqbyzPu-BRNCTWq7f1e98s0PMIijE710kvfyNtsiq7/exec" method="POST" target="hidden_iframe">
   <input type="hidden" name="code" id="codeInput">
 </form>
 <iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <script>
-function submitAttendance(code) {
-  document.getElementById('codeInput').value = code;
-
-  // تخزين مؤقت Offline
+// حفظ Offline أولًا
+function saveOffline(code) {
   let queue = JSON.parse(localStorage.getItem('attendanceQueue') || '[]');
   queue.push({code: code, time: new Date().toISOString()});
   localStorage.setItem('attendanceQueue', JSON.stringify(queue));
+}
 
-  // إرسال البيانات فورًا
+// إرسال البيانات فورًا لـ Google Sheet
+function submitAttendance(code) {
+  saveOffline(code);
+  document.getElementById('codeInput').value = code;
   document.getElementById('attendanceForm').submit();
-
   alert("تم تسجيل حضورك!");
 }
 
-// مثال: استدعاء عند فتح الصفحة بالـ QR code
+// قراءة الكود من QR
 const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get('code');
 if (code) submitAttendance(code);
 </script>
 
-}
-
-submitAttendance("12345");
-</script>
-
-}
-
-// أول ما النت يرجع
-window.addEventListener("online", syncData);
-</script>
 
 </body>
 </html>
