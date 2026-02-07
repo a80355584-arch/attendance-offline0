@@ -45,16 +45,22 @@ function syncData() {
 
   const item = queue[0];
 
-  fetch(`${SCRIPT_URL}?code=${item.code}`)
-    .then(r => r.text())
-    .then(() => {
-      queue.shift(); // حذف بعد الإرسال
-      localStorage.setItem("attendanceQueue", JSON.stringify(queue));
-      syncData(); // إرسال الباقي
-    })
-    .catch(() => {
-      console.log("لسه مفيش نت");
-    });
+<form id="attendanceForm" action="https://script.google.com/macros/s/XXXX/exec" method="POST" target="hidden_iframe">
+  <input type="hidden" name="code" value="12345">
+</form>
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
+<script>
+function submitAttendance(code) {
+  const form = document.getElementById("attendanceForm");
+  form.code.value = code; // تحديث الكود
+  form.submit();
+  alert("تم إرسال الحضور بنجاح!");
+}
+
+submitAttendance("12345");
+</script>
+
 }
 
 // أول ما النت يرجع
